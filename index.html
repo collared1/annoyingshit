@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Even More Horrible Date Picker</title>
+<style>
+  body {
+    font-family: Comic Sans MS, cursive;
+    text-align: center;
+    background: repeating-linear-gradient(45deg, #ffcccc, #ccffcc 20px, #ccccff 40px);
+    color: #222;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+  }
+  h1 {
+    background: yellow;
+    margin: 0;
+    padding: 20px;
+    border-bottom: 5px dashed red;
+  }
+  #game {
+    margin-top: 50px;
+    position: relative;
+  }
+  button {
+    font-size: 24px;
+    padding: 10px 30px;
+    margin: 10px;
+    background-color: magenta;
+    color: white;
+    border: 5px dotted black;
+    cursor: pointer;
+    position: absolute;
+    transition: all 0.2s ease;
+  }
+  #currentDate {
+    font-size: 32px;
+    background: white;
+    border: 3px solid black;
+    padding: 10px;
+    display: inline-block;
+    margin-top: 30px;
+  }
+  #message {
+    font-size: 24px;
+    margin-top: 20px;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+<h1 id="goal">Your goal: ???</h1>
+
+<div id="game">
+  <button id="start" style="position:static;">Start</button>
+  <div id="currentDate"></div><br>
+  <button id="lower" style="display:none;">Lower</button>
+  <button id="higher" style="display:none;">Higher</button><br>
+  <button id="submit" style="display:none; position:static;">Submit</button>
+  <div id="message"></div>
+</div>
+
+<script>
+function randomDate(min, max) {
+  return new Date(min.getTime() + Math.random() * (max.getTime() - min.getTime()));
+}
+
+function randomizeButtonPosition(button) {
+  const maxX = window.innerWidth - button.offsetWidth - 20;
+  const maxY = window.innerHeight - button.offsetHeight - 20;
+  const x = Math.random() * maxX;
+  const y = Math.random() * (maxY - 100) + 100;
+  button.style.left = `${x}px`;
+  button.style.top = `${y}px`;
+}
+
+const minDate = new Date(1, 0, 1);
+const maxDate = new Date(9999, 11, 31);
+
+let lowerBound = minDate;
+let upperBound = maxDate;
+let currentDate;
+let goalDate;
+let gameOver = false;
+
+const goal = document.getElementById('goal');
+const currentDateDisplay = document.getElementById('currentDate');
+const startBtn = document.getElementById('start');
+const higherBtn = document.getElementById('higher');
+const lowerBtn = document.getElementById('lower');
+const submitBtn = document.getElementById('submit');
+const message = document.getElementById('message');
+
+function formatDate(date) {
+  const y = date.getFullYear();
+  const m = date.getMonth() + 1;
+  const d = date.getDate();
+  return `${m}/${d}/${y}`;
+}
+
+function updateDisplay() {
+  currentDateDisplay.textContent = formatDate(currentDate);
+}
+
+function lose(reason) {
+  message.textContent = `💀 You lose! ${reason}`;
+  message.style.color = "red";
+  gameOver = true;
+  higherBtn.disabled = true;
+  lowerBtn.disabled = true;
+  submitBtn.disabled = true;
+}
+
+function teleportButtons() {
+  if (!gameOver && higherBtn.style.display !== "none") {
+    randomizeButtonPosition(higherBtn);
+    randomizeButtonPosition(lowerBtn);
+  }
+}
+
+startBtn.onclick = () => {
+  goalDate = randomDate(minDate, maxDate);
+  goal.textContent = `Your goal: ${formatDate(goalDate)}`;
+  startBtn.style.display = "none";
+  higherBtn.style.display = "inline-block";
+  lowerBtn.style.display = "inline-block";
+  submitBtn.style.display = "inline-block";
+  message.textContent = "";
+  lowerBound = minDate;
+  upperBound = maxDate;
+  currentDate = randomDate(lowerBound, upperBound);
+  gameOver = false;
+  higherBtn.disabled = false;
+  lowerBtn.disabled = false;
+  submitBtn.disabled = false;
+  updateDisplay();
+  teleportButtons();
+};
+
+higherBtn.onclick = () => {
+  if (gameOver) return;
+  if (currentDate > goalDate) {
+    lose("You went higher when you were already above the goal!");
+    return;
+  }
+  lowerBound = new Date(currentDate.getTime() + 86400000);
+  currentDate = randomDate(lowerBound, upperBound);
+  updateDisplay();
+  teleportButtons();
+};
+
+lowerBtn.onclick = () => {
+  if (gameOver) return;
+  if (currentDate < goalDate) {
+    lose("You went lower when you were already below the goal!");
+    return;
+  }
+  upperBound = new Date(currentDate.getTime() - 86400000);
+  currentDate = randomDate(lowerBound, upperBound);
+  updateDisplay();
+  teleportButtons();
+};
+
+submitBtn.onclick = () => {
+  if (gameOver) return;
+  if (currentDate.toDateString() === goalDate.toDateString()) {
+    message.textContent = "🎉 You actually did it!?!?";
+    message.style.color = "green";
+    higherBtn.disabled = true;
+    lowerBtn.disabled = true;
+    submitBtn.disabled = true;
+  } else {
+    message.textContent = "❌ Nope. Not even close.";
+    message.style.color = "red";
+  }
+};
+
+// make buttons teleport every 5 seconds
+setInterval(teleportButtons, 5000);
+</script>
+</body>
+</html>
