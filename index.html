@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Even More Horrible Date Picker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Universal Horrible Date Picker</title>
 <style>
   body {
     font-family: Comic Sans MS, cursive;
@@ -12,30 +13,38 @@
     margin: 0;
     padding: 0;
     overflow: hidden;
+    height: 100vh;
   }
   h1 {
     background: yellow;
     margin: 0;
-    padding: 20px;
+    padding: 15px;
     border-bottom: 5px dashed red;
+    font-size: clamp(18px, 4vw, 28px);
   }
   #game {
-    margin-top: 50px;
     position: relative;
+    width: 100%;
+    height: calc(100vh - 100px);
+    overflow: hidden;
   }
   button {
-    font-size: 24px;
-    padding: 10px 30px;
-    margin: 10px;
+    font-size: clamp(16px, 4vw, 24px);
+    padding: 10px 20px;
     background-color: magenta;
     color: white;
-    border: 5px dotted black;
+    border: 3px dotted black;
+    border-radius: 5px;
     cursor: pointer;
     position: absolute;
-    transition: all 0.2s ease;
+    transition: all 0.25s ease;
+  }
+  #start, #submit {
+    position: static;
+    margin-top: 20px;
   }
   #currentDate {
-    font-size: 32px;
+    font-size: clamp(20px, 6vw, 32px);
     background: white;
     border: 3px solid black;
     padding: 10px;
@@ -43,8 +52,8 @@
     margin-top: 30px;
   }
   #message {
-    font-size: 24px;
-    margin-top: 20px;
+    font-size: clamp(16px, 4vw, 24px);
+    margin-top: 15px;
     font-weight: bold;
   }
 </style>
@@ -53,11 +62,11 @@
 <h1 id="goal">Your goal: ???</h1>
 
 <div id="game">
-  <button id="start" style="position:static;">Start</button>
+  <button id="start">Start</button>
   <div id="currentDate"></div><br>
   <button id="lower" style="display:none;">Lower</button>
   <button id="higher" style="display:none;">Higher</button><br>
-  <button id="submit" style="display:none; position:static;">Submit</button>
+  <button id="submit" style="display:none;">Submit</button>
   <div id="message"></div>
 </div>
 
@@ -67,10 +76,11 @@ function randomDate(min, max) {
 }
 
 function randomizeButtonPosition(button) {
-  const maxX = window.innerWidth - button.offsetWidth - 20;
-  const maxY = window.innerHeight - button.offsetHeight - 20;
+  const game = document.getElementById('game');
+  const maxX = game.clientWidth - button.offsetWidth;
+  const maxY = game.clientHeight - button.offsetHeight;
   const x = Math.random() * maxX;
-  const y = Math.random() * (maxY - 100) + 100;
+  const y = Math.random() * maxY;
   button.style.left = `${x}px`;
   button.style.top = `${y}px`;
 }
@@ -178,6 +188,8 @@ submitBtn.onclick = () => {
 
 // make buttons teleport every 5 seconds
 setInterval(teleportButtons, 5000);
+
+window.addEventListener('resize', teleportButtons);
 </script>
 </body>
 </html>
